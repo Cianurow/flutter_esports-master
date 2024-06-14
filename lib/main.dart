@@ -1,7 +1,8 @@
 
 import 'package:aplicacion_esports/pages/Pantalla_Inicio.dart';
 import 'package:aplicacion_esports/pages/Pantalla_Inicio_Sesion.dart';
-import 'package:aplicacion_esports/pages/tabs/partidos_tab.dart';
+import 'package:aplicacion_esports/pages/pantalla_jugadores.dart';
+import 'package:aplicacion_esports/pages/tabs/tab_partidos.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -42,7 +43,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => Pantalla_Inicio_Sesion(),
         '/PantallaInicio':(context) => PantallaInicio(),
-        '/PartidosTab':(context) => PartidosTab()
+        '/Partidos':(context) => Partidos(),
+        '/detalleEquipo': (context) => DetalleEquipoScreen(equipoId: ModalRoute.of(context)!.settings.arguments as int),
       },
       initialRoute: '/',
       );

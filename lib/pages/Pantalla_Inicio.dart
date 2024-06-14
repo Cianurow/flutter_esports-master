@@ -1,102 +1,80 @@
+import 'package:aplicacion_esports/pages/tabs/tab_equipos.dart';
+import 'package:aplicacion_esports/pages/tabs/tab_home.dart';
+import 'package:aplicacion_esports/pages/tabs/tab_partidos.dart';
+import 'package:aplicacion_esports/pages/tabs/tab_perfil.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-class PantallaInicio extends StatelessWidget {
+
+class PantallaInicio extends StatefulWidget {
   const PantallaInicio({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Home',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Color.fromARGB(255, 111, 8, 8),
-      ),
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Button(
-                    onPressed: () => Navigator.pushNamed(context, '/PartidosTab'),
-                    icon: Icons.person_2_rounded,
-                  ),
-                  Button(
-                    onPressed: () => Navigator.pushNamed(context, '/Contratos'),
-                    icon: Icons.assignment,
-                  ),
-                ],
-              ),
-              SizedBox(height: 40),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Button(
-                    onPressed: () => Navigator.pushNamed(context, '/Servicios'),
-                    icon: Icons.room_service_outlined,
-                  ),
-                  Button(
-                    onPressed: () => Navigator.pushNamed(context, '/Hoteles'),
-                    icon: Icons.home_work,
-                  ),
-                ],
-              ),
-              SizedBox(height: 50),
-              Image.asset(
-                'assets/letras2 (2).png',
-                width: 200,
-                height: 200,
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(MdiIcons.earth),
-            label: 'Home',
-            
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(MdiIcons.setAll),
-            label: 'Partidos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(MdiIcons.earth),
-            label: 'Equipos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(MdiIcons.faceMan),
-            label: 'Perfil',
-          ),
-        ],
-      ),
-    );
-  }
+  State<PantallaInicio> createState() => _PantallaInicioState();
+}
 
-  Widget Button({required VoidCallback onPressed, required IconData icon}) {
-    return Container(
-      width: 150,
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(
-          icon,
-          size: 50,
-          color: Color.fromARGB(255, 42, 40, 39),
+class _PantallaInicioState extends State<PantallaInicio> {
+  int _currentIndex = 0;
+  final List<Map<String, dynamic>> _paginas = [
+    {
+    'pagina':Home(),
+    'texto':'Home',
+    'color':0xFFD80100,
+    'icono':MdiIcons.home
+    },
+
+    {
+    'pagina':Partidos(),
+    'texto':'Partidos',
+    'color':0xFF037470,
+    'icono':MdiIcons.soccer
+    },
+
+    {
+    'pagina':Equipos(),
+    'texto':'Equipos',
+    'color':0xFFFF8B00,
+    'icono':MdiIcons.accountGroup
+    },
+
+    {
+    'pagina':Perfil(),
+    'texto':'Perfil',
+    'color':0xFF4A90E2,
+    'icono':MdiIcons.account
+    },
+
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: DefaultTabController(
+        length: 1,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(_paginas[_currentIndex]['texto'],
+            style: TextStyle(color: Colors.white),
+          ),
+            backgroundColor: Color(_paginas[_currentIndex]['color']),
+          ),
+          body: _paginas[_currentIndex]['pagina'],
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: _paginas.map((pagina){
+              return BottomNavigationBarItem(
+                icon: Icon(pagina['icono']),
+                label: pagina['texto'],
+                backgroundColor: Color(pagina['color']),
+                );
+            }).toList(),
+            currentIndex: _currentIndex,
+            onTap: (index){
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
         ),
       ),
     );

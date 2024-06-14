@@ -16,14 +16,14 @@ class Pantalla_Inicio_Sesion extends StatelessWidget {
                 color: Color.fromARGB(255, 255, 255, 255)
               ),
               ),
-            backgroundColor: Color.fromARGB(255, 111, 8, 8),
+            backgroundColor: Color.fromARGB(255, 0, 0, 0),
           ),
           body: Stack(
             children: [
               Container(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/Fondo.png'),
+                    image: AssetImage('assets/image.jpg'),
                     fit: BoxFit.cover,
                   )
                 ),
