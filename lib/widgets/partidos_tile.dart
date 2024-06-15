@@ -1,7 +1,7 @@
 import 'package:aplicacion_esports/pages/partido_detalle.dart';
 import 'package:aplicacion_esports/pages/partido_editar.dart';
-import 'package:aplicacion_esports/services/http_service.dart';
 import 'package:flutter/material.dart';
+import 'package:aplicacion_esports/services/http_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -202,18 +202,7 @@ class _PartidosTileState extends State<PartidosTile> {
                               style: TextStyle(color: Colors.red),
                             ),
                             onPressed: () async {
-                              print('BORRAR: ${this.widget.id}');
-                              await HttpService()
-                                  .eliminarPartido(widget.id)
-                                  .then((borradoOK) {
-                                if (borradoOK) {
-                                  print('Partido borrado');
-                                  setState(() {
-                                    widget.onRecargar();
-                                    Navigator.of(context).pop(true);
-                                  });
-                                }
-                              });
+                              Navigator.of(context).pop(true);
                             },
                           ),
                         ],
@@ -221,7 +210,19 @@ class _PartidosTileState extends State<PartidosTile> {
                     },
                   );
 
-                  if (confirmarEliminacion == true) {}
+                  if (confirmarEliminacion == true) {
+                    bool borradoOK = await HttpService().eliminarPartido(widget.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          borradoOK ? 'Partido eliminado exitosamente' : 'Error al eliminar el partido',
+                        ),
+                      ),
+                    );
+                    if (borradoOK) {
+                      widget.onRecargar();
+                    }
+                  }
                 },
                 child: Text(
                   'Eliminar',

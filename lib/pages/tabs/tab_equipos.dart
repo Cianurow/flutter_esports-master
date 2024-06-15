@@ -1,6 +1,7 @@
+import 'package:aplicacion_esports/pages/equipos_agregar.dart';
 import 'package:aplicacion_esports/pages/pantalla_jugadores.dart';
-import 'package:aplicacion_esports/services/http_service.dart';
 import 'package:flutter/material.dart';
+import 'package:aplicacion_esports/services/http_service.dart';
 
 class Equipos extends StatefulWidget {
   @override
@@ -19,14 +20,13 @@ class _EquiposState extends State<Equipos> {
   }
 
   void _cargarEquipos() async {
-  try {
-    List<dynamic> response = await httpService.equipos();
-    
-    // Agrupar equipos por juego
-    Map<String, List<dynamic>> groupedEquipos = {};
+    try {
+      List<dynamic> response = await httpService.equipos();
+      
+      // Agrupar equipos por juego
+      Map<String, List<dynamic>> groupedEquipos = {};
 
-    for (var equipo in response) {
-      if (equipo.containsKey('juegos')) {
+      for (var equipo in response) {
         String juego = equipo['juegos'];
 
         if (!groupedEquipos.containsKey(juego)) {
@@ -34,27 +34,73 @@ class _EquiposState extends State<Equipos> {
         }
 
         groupedEquipos[juego]?.add(equipo);
+      }
+
+      setState(() {
+        equiposPorJuego = groupedEquipos;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error al obtener equipos: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _eliminarEquipo(String id) async {
+    bool confirmado = await _mostrarDialogoConfirmacion();
+    if (confirmado) {
+      bool success = await httpService.eliminarEquipo(id);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        
+          content: Text('Equipo eliminado exitosamente'),
+        ));
+        _cargarEquipos();
       } else {
-        print('Equipo sin juego definido: $equipo');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al eliminar el equipo'),
+        ));
       }
     }
-
-    // Impresión de depuración para verificar la agrupación
-    groupedEquipos.forEach((juego, equipos) {
-      print('Juego: $juego - Cantidad de Equipos: ${equipos.length}');
-    });
-
-    setState(() {
-      equiposPorJuego = groupedEquipos;
-      isLoading = false;
-    });
-  } catch (e) {
-    print('Error al obtener equipos: $e');
-    setState(() {
-      isLoading = false;
-    });
   }
-}
+
+  Future<bool> _mostrarDialogoConfirmacion() async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color.fromARGB(255, 212, 212, 212),
+          title: Text('Confirmación'),
+          content: Text('¿Estás seguro de que deseas eliminar este equipo?'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                                backgroundColor: Colors.white),
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                                backgroundColor:
+                                    Color.fromARGB(255, 230, 230, 230)),
+              child: Text('Eliminar', style: TextStyle(color: Colors.red),),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+  }
+
+  void recargarEquipos() {
+    _cargarEquipos();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +110,6 @@ class _EquiposState extends State<Equipos> {
         body: isLoading
             ? Center(child: CircularProgressIndicator())
             : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Container(
                     height: MediaQuery.of(context).size.height / 4,
@@ -86,10 +131,10 @@ class _EquiposState extends State<Equipos> {
                     ),
                   ),
                   Container(
-                    color: Color(0xFFFF8B00), 
+                    color: Colors.orange, // Fondo naranja para el TabBar
                     child: TabBar(
-                      labelColor: Colors.white,
-                      indicatorColor: Colors.white,
+                      labelColor: Colors.white, // Letra blanca
+                      indicatorColor: Colors.white, // Indicador blanco
                       isScrollable: true,
                       tabs: equiposPorJuego.keys.map((juego) {
                         return Tab(text: juego);
@@ -105,6 +150,7 @@ class _EquiposState extends State<Equipos> {
                           itemBuilder: (context, index) {
                             return GestureDetector(
                               onTap: () {
+                               
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -112,7 +158,7 @@ class _EquiposState extends State<Equipos> {
                                       equipoId: equipos[index]['id'],
                                     ),
                                   ),
-                                );
+                                ); 
                               },
                               child: Card(
                                 elevation: 5,
@@ -139,7 +185,12 @@ class _EquiposState extends State<Equipos> {
                                       equipos[index]['juegos'],
                                       style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                                     ),
-                                    trailing: Icon(Icons.arrow_forward_ios, color: Colors.orange),
+                                    trailing: IconButton(
+                                      icon: Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () {
+                                        _eliminarEquipo(equipos[index]['id'].toString());
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
@@ -151,6 +202,24 @@ class _EquiposState extends State<Equipos> {
                   ),
                 ],
               ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          backgroundColor: Colors.blueGrey,
+          onPressed: () async {
+            MaterialPageRoute ruta = MaterialPageRoute(
+              builder: (context) => EquiposAgregar(),
+            );
+            Navigator.push(context, ruta).then((value) {
+              setState(() {
+                _cargarEquipos();
+              });
+            });
+          },
+        ),
       ),
     );
   }

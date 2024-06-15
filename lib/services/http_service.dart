@@ -183,6 +183,32 @@ class HttpService {
     }
   }
   //Equipo
+
+  Future<bool> agregarEquipo(String nombre, String juegos) async {
+  var url = Uri.parse('$apiUrl/equipos');
+  var response = await http.post(
+    url,
+    headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'Accept': 'application/json'},
+    body: json.encode(<String, dynamic>{
+      'nombre': nombre,
+      'juegos': juegos,
+    }),
+  );
+  return response.statusCode == 201;
+  }
+
+  Future<bool> eliminarEquipo(String id) async {
+  final url = '$apiUrl/equipos/$id';
+  final response = await http.delete(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    print('Error al eliminar el equipo: ${response.statusCode}');
+    return false;
+  }
+}
+
   Future<List<dynamic>> obtenerJugadoresPorEquipo(int equipoId) async {
     var url = Uri.parse('$apiUrl/jugadores?equipo_id=$equipoId');
     var respuesta = await http.get(url);
@@ -192,6 +218,97 @@ class HttpService {
     } else {
       print('Error al obtener jugadores por equipo: ${respuesta.statusCode}');
       throw Exception('Failed to load jugadores');
+    }
+  }
+
+  //Campeonato
+
+   Future<Map<String, dynamic>> obtenerCampeonato(String id) async {
+  final response = await http.get(Uri.parse('$apiUrl/campeonatos/$id'));
+  print(id);
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load campeonato');
+  }
+}
+
+
+  Future<Map<String, dynamic>> agregarCampeonato(String nombre, String fechaInicio, String fechaTermino, String reglas, String premios) async {
+  final url = Uri.parse('$apiUrl/campeonatos');
+
+  var response = await http.post(
+    url,
+    headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'Accept': 'application/json'},
+    body: json.encode(<String, dynamic>{
+      'nombre': nombre,
+        'fecha_inicio': fechaInicio,
+        'fecha_termino': fechaTermino,
+        'reglas': reglas,
+        'premios': premios,
+    }),
+  );
+  return json.decode(response.body);
+  }
+
+
+
+  Future<bool> eliminarCampeonato(String id) async {
+  try {
+    final url = Uri.parse('$apiUrl/campeonatos/$id');
+    final response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      // Éxito
+      print('Campeonato eliminado con éxito');
+      return true;
+    } else {
+      // Error
+      print('Error al eliminar el campeonato: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    // Captura cualquier excepción que pueda ocurrir durante la solicitud
+    print('Excepción en eliminarCampeonato: $e');
+    throw e; // Re-lanza la excepción para que el llamador también pueda manejarla si es necesario
+  }
+}
+
+  //Jugador 
+
+  Future<bool> agregarJugador(String rut, String nombre, String apellido, String posicion, int equipoId) async {
+  var url = Uri.parse('$apiUrl/jugadores');
+  print(equipoId);
+  var response = await http.post(
+    url,
+    headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'Accept': 'application/json'},
+    body: json.encode(<String, dynamic>{
+        'rut': rut,
+        'nombre': nombre,
+        'apellido': apellido,
+        'posicion': posicion,
+        'equipo_id': equipoId.toString(),
+    }),
+  );
+  return response.statusCode == 201;
+  }
+
+  Future<void> eliminarJugador(String jugadorId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$apiUrl/jugadores/$jugadorId'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+      
+      if (response.statusCode == 200) {
+        print('Jugador eliminado correctamente');
+      } else {
+        print('Error al eliminar jugador: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error en la solicitud HTTP: $e');
     }
   }
 
